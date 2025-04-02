@@ -8,21 +8,27 @@ yarn.lock
 
 # Environment variables
 .env
-.env.local
-.env.development
-.env.production
-
-# Build files
-dist/
-build/
-.cache/
-coverage/
 
 # Logs
 logs/
 *.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+debug.log
 
-# Editor/IDE files
+# Database files
+*.sqlite
+*.sqlite3
+dump.rdb
+*.env.local
+
+# Compiled files
+dist/
+build/
+coverage/
+
+# IDE files
 .vscode/
 .idea/
 .DS_Store
