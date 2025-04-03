@@ -41,7 +41,7 @@ const CodeEditor = ({ roomId }) => {
     <Editor
       height="90vh"
       theme="vs-dark"
-      defaultLanguage="javascript"
+      defaultLanguage="cpp"
       value={code}
       onChange={handleCodeChange}
     />

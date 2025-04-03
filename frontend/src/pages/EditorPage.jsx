@@ -8,6 +8,7 @@ const EditorPage = () => {
   const { roomId } = useParams();
   const [code, setCode] = useState("");
   const editorRef = useRef(null);
+  const isUpdatingRef = useRef(false); // Prevents infinite loop
 
   useEffect(() => {
     if (!socket.connected) socket.connect();
@@ -16,10 +17,21 @@ const EditorPage = () => {
     socket.emit("requestCode", roomId);
 
     socket.on("codeUpdate", (newCode) => {
-      if (editorRef.current) {
+      if (editorRef.current && !isUpdatingRef.current) {
         const editor = editorRef.current;
-        if (newCode !== editor.getValue()) {
-          editor.setValue(newCode);
+        const currentValue = editor.getValue();
+
+        if (newCode !== currentValue) {
+          const selection = editor.getSelection(); // Save cursor position
+
+          editor.executeEdits("", [
+            {
+              range: editor.getModel().getFullModelRange(),
+              text: newCode,
+            },
+          ]);
+
+          editor.setSelection(selection); // Restore cursor position
         }
       }
     });
@@ -38,21 +50,29 @@ const EditorPage = () => {
   }, [roomId]);
 
   const handleCodeChange = debounce((newCode) => {
-    if (newCode !== code) {
+    if (editorRef.current && !isUpdatingRef.current) {
+      isUpdatingRef.current = true; // Prevents feedback loop
       setCode(newCode);
       socket.emit("sendCode", { roomId, code: newCode });
+
+      setTimeout(() => {
+        isUpdatingRef.current = false;
+      }, 100);
     }
-  }, 300);
+  }, 200);
 
   return (
     <div>
       <h1>Room ID: {roomId}</h1>
       <Editor
         height="80vh"
-        defaultLanguage="javascript"
+        defaultLanguage="cpp"  // Changed to C++
         theme="vs-dark"
         value={code}
-        onMount={(editor) => (editorRef.current = editor)}
+        onMount={(editor) => {
+          editorRef.current = editor;
+          editor.setValue(code);
+        }}
         onChange={handleCodeChange}
       />
     </div>
