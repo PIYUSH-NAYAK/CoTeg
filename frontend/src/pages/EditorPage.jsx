@@ -6,9 +6,9 @@ import { debounce } from "lodash";
 
 const EditorPage = () => {
   const { roomId } = useParams();
-  const [code, setCode] = useState("");
+  const [code, setCode] = useState("// Loading code...");
   const editorRef = useRef(null);
-  const isUpdatingRef = useRef(false); // Prevents infinite loop
+  const isUpdatingRef = useRef(false);
 
   useEffect(() => {
     if (!socket.connected) socket.connect();
@@ -20,18 +20,15 @@ const EditorPage = () => {
       if (editorRef.current && !isUpdatingRef.current) {
         const editor = editorRef.current;
         const currentValue = editor.getValue();
-
         if (newCode !== currentValue) {
-          const selection = editor.getSelection(); // Save cursor position
-
+          const selection = editor.getSelection();
           editor.executeEdits("", [
             {
               range: editor.getModel().getFullModelRange(),
               text: newCode,
             },
           ]);
-
-          editor.setSelection(selection); // Restore cursor position
+          editor.setSelection(selection);
         }
       }
     });
@@ -51,30 +48,31 @@ const EditorPage = () => {
 
   const handleCodeChange = debounce((newCode) => {
     if (editorRef.current && !isUpdatingRef.current) {
-      isUpdatingRef.current = true; // Prevents feedback loop
+      isUpdatingRef.current = true;
       setCode(newCode);
       socket.emit("sendCode", { roomId, code: newCode });
-
-      setTimeout(() => {
-        isUpdatingRef.current = false;
-      }, 100);
+      setTimeout(() => (isUpdatingRef.current = false), 100);
     }
   }, 200);
 
   return (
-    <div>
-      <h1>Room ID: {roomId}</h1>
-      <Editor
-        height="80vh"
-        defaultLanguage="cpp"  // Changed to C++
-        theme="vs-dark"
-        value={code}
-        onMount={(editor) => {
-          editorRef.current = editor;
-          editor.setValue(code);
-        }}
-        onChange={handleCodeChange}
-      />
+    <div className="bg-gray-900 h-screen p-4">
+      <div className="text-white text-2xl mb-4 font-semibold">
+        Room ID: <span className="font-mono text-blue-400">{roomId}</span>
+      </div>
+      <div className="rounded-lg overflow-hidden border-2 border-gray-700">
+        <Editor
+          height="85vh"
+          defaultLanguage="cpp"
+          theme="vs-dark"
+          value={code}
+          onMount={(editor) => {
+            editorRef.current = editor;
+            editor.setValue(code);
+          }}
+          onChange={handleCodeChange}
+        />
+      </div>
     </div>
   );
 };

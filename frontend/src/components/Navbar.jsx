@@ -1,12 +1,10 @@
-// src/components/Navbar.jsx
 import React, { useState, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useAuthState } from "react-firebase-hooks/auth";
-import { auth, logout } from "../auth";
+import { useAuth } from "../context/AuthProvider"; // Import useAuth() from context
 
 const Navbar = () => {
-  const [user] = useAuthState(auth);
   const navigate = useNavigate();
+  const { user, logout } = useAuth();
   const [open, setOpen] = useState(false);
   const menuRef = useRef();
 
@@ -21,6 +19,11 @@ const Navbar = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  const handleLogout = async () => {
+    await logout();
+    navigate("/login");
+  };
+
   return (
     <nav className="bg-gray-900 text-white px-6 py-4 shadow-md flex justify-between items-center relative">
       <Link to="/home" className="text-2xl font-bold text-blue-400">
@@ -30,7 +33,7 @@ const Navbar = () => {
       {user && (
         <div className="relative" ref={menuRef}>
           <img
-            src={  "../Profile.jpg "} // ✅ loads from public/Profile.jpg
+            src={user.photoURL || "/Profile.jpg"} // ✅ Use Firebase photoURL if available
             alt="Profile"
             className="w-10 h-10 rounded-full cursor-pointer object-cover"
             onClick={() => setOpen(!open)}
@@ -45,10 +48,7 @@ const Navbar = () => {
                 <p className="text-xs text-gray-600 truncate">{user.email}</p>
               </div>
               <button
-                onClick={() => {
-                  logout();
-                  navigate("/login");
-                }}
+                onClick={handleLogout}
                 className="w-full text-left px-4 py-2 hover:bg-gray-300 text-red-600 text-sm"
               >
                 Logout

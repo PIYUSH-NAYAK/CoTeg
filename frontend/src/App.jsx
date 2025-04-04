@@ -12,6 +12,7 @@ import { auth } from "./firebase";
 import HomePage from "./pages/HomePage";
 import EditorPage from "./pages/EditorPage";
 import Login from "./components/Login";
+// import Signup from "./components/Signup"; // ✅ import Signup
 import Navbar from "./components/Navbar";
 
 const ProtectedRoute = ({ element }) => {
@@ -19,6 +20,7 @@ const ProtectedRoute = ({ element }) => {
 
   if (loading)
     return <div className="text-center mt-10 text-lg">Loading...</div>;
+
   return user ? (
     <>
       <Navbar />
@@ -40,6 +42,7 @@ const App = () => {
           element={user ? <Navigate to="/home" /> : <Navigate to="/login" />}
         />
         <Route path="/login" element={<Login />} />
+        {/* <Route path="/signup" element={<Signup />} /> ✅ new route */}
         <Route
           path="/home"
           element={<ProtectedRoute element={<HomePage />} />}

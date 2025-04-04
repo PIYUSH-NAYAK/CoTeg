@@ -10,10 +10,15 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.0",
     "@monaco-editor/react": "^4.7.0",
+    "@mui/material": "^7.0.1",
     "@tailwindcss/vite": "^4.1.2",
+    "axios": "^1.8.4",
     "firebase": "^11.6.0",
     "lodash": "^4.17.21",
+    "lucide-react": "^0.487.0",
     "monaco-editor": "^0.52.2",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",

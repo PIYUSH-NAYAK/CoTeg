@@ -1,18 +1,13 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuthState } from "react-firebase-hooks/auth";
-import {
-  auth,
-  signInWithGoogle,
-  signInWithEmail,
-  signUpWithEmail,
-} from "../auth";
+import { useAuth } from "../context/AuthProvider";
 
 const Login = () => {
   const navigate = useNavigate();
-  const [user] = useAuthState(auth);
+  const { user, signInWithGoogle, signInWithEmail, signUpWithEmail } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
 
   useEffect(() => {
     if (user) {
@@ -20,12 +15,34 @@ const Login = () => {
     }
   }, [user, navigate]);
 
-  const handleLogin = () => {
-    signInWithEmail(email, password);
+  const handleLogin = async () => {
+    setError("");
+    try {
+      const result = await signInWithEmail(email, password);
+      if (!result) throw new Error("No account found with this email or incorrect password.");
+    } catch (err) {
+      setError(err.message);
+    }
   };
 
-  const handleSignup = () => {
-    signUpWithEmail(email, password);
+  const handleSignup = async () => {
+    setError("");
+    try {
+      const result = await signUpWithEmail(email, password);
+      if (!result) throw new Error("Could not sign up. Email might already be linked to Google. Try Google login.");
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
+  const handleGoogleSignIn = async () => {
+    setError("");
+    try {
+      const result = await signInWithGoogle();
+      if (!result) throw new Error("Google Sign-In failed.");
+    } catch (err) {
+      setError(err.message);
+    }
   };
 
   return (
@@ -34,7 +51,7 @@ const Login = () => {
         <h2 className="text-3xl font-bold text-center mb-6">Welcome Back</h2>
 
         <button
-          onClick={signInWithGoogle}
+          onClick={handleGoogleSignIn}
           className="flex items-center justify-center w-full bg-white border border-gray-300 rounded-lg px-4 py-2 text-gray-700 hover:bg-gray-50 mb-6"
         >
           <img
@@ -62,10 +79,16 @@ const Login = () => {
         <input
           type="password"
           placeholder="Password"
-          className="w-full px-4 py-2 mb-6 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full px-4 py-2 mb-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
+
+        {error && (
+          <p className="text-red-500 text-center mb-4 text-sm">
+            {error}
+          </p>
+        )}
 
         <button
           onClick={handleLogin}
