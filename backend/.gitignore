@@ -36,3 +36,6 @@ coverage/
 
 # OS-specific files
 Thumbs.db
+
+# Firebase Admin SDK key
+config/firebaseAdmin.json
