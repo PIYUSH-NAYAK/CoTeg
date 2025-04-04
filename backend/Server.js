@@ -5,6 +5,7 @@ const { Server } = require("socket.io");
 const cors = require("cors");
 const connectDb = require("./utils/db");
 const roomRouter = require("./routes/authRouter");
+const repoRouter = require("./routes/repoRoutes"); // ✅ Import repo routes
 const Room = require("./models/room");
 
 const app = express();
@@ -16,6 +17,7 @@ app.use(express.json());
 
 // Routes
 app.use("/api/rooms", roomRouter);
+app.use("/api/repos", repoRouter); // ✅ Add repo routes
 
 // Socket.IO Setup
 const io = new Server(server, {
@@ -44,7 +46,6 @@ io.on("connection", (socket) => {
     }
   });
 
-  // ✅ Fix: Handle requestCode event
   socket.on("requestCode", async (roomId) => {
     try {
       const room = await Room.findOne({ roomId });
@@ -56,7 +57,6 @@ io.on("connection", (socket) => {
     }
   });
 
-  // ✅ Fix: Unified event names (sendCode instead of codeChange)
   socket.on("sendCode", async ({ roomId, code }) => {
     socket.to(roomId).emit("codeUpdate", code);
 
