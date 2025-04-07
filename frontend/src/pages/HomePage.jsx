@@ -10,8 +10,8 @@ export default function HomePage() {
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
   return (
-    <div className="flex h-screen bg-gray-100">
-      <Sidebar userId="someUserId" />
+<div className="flex h-screen bg-gradient-to-r from-purple-700 via-indigo-500 to-blue-500">
+<Sidebar userId="someUserId" />
 
       <div className="flex-1 p-6 flex flex-col items-center justify-center text-center">
         <h1 className="text-4xl font-bold text-gray-900">Welcome to Coteg</h1>

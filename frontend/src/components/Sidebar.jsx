@@ -1,107 +1,54 @@
 import { useState, useEffect } from "react";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
-import axios from "axios";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Folder, Plus, Trash, ChevronLeft, ChevronRight } from "lucide-react";
+
+import { fetchRepos, createRepo, deleteRepo } from "../api/repoApi"; // ✅ Make sure path is correct
 
 export default function Sidebar() {
   const [collapsed, setCollapsed] = useState(false);
   const [repos, setRepos] = useState([]);
   const [newRepoName, setNewRepoName] = useState("");
-  const [userId, setUserId] = useState(null); // ✅ Fetch userId from Firebase
+  const [userId, setUserId] = useState(null);
 
   useEffect(() => {
     const auth = getAuth();
-    
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
-        setUserId(user.uid); // ✅ Set the correct userId
+        setUserId(user.uid);
       } else {
         setUserId(null);
       }
     });
 
-    return () => unsubscribe(); // Cleanup on unmount
+    return () => unsubscribe();
   }, []);
 
   useEffect(() => {
     if (userId) {
-      fetchRepos();
+      loadRepos();
     }
   }, [userId]);
 
-  const fetchRepos = async () => {
-    if (!userId) return;
-
-    try {
-      const auth = getAuth();
-      const token = await auth.currentUser?.getIdToken();
-
-      if (!token) {
-        console.error("❌ No authentication token found.");
-        return;
-      }
-
-      const response = await axios.get(`http://localhost:5000/api/repos?userId=${userId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      setRepos(response.data);
-    } catch (error) {
-      console.error("❌ Error fetching repositories:", error?.response?.data || error.message);
-    }
+  const loadRepos = async () => {
+    const data = await fetchRepos(userId);
+    if (data) setRepos(data);
   };
 
-  const createRepo = async () => {
+  const handleCreateRepo = async () => {
     if (!newRepoName.trim() || !userId) return;
 
-    try {
-      const auth = getAuth();
-      const token = await auth.currentUser?.getIdToken();
-
-      if (!token) {
-        console.error("❌ No authentication token found.");
-        return;
-      }
-
-      await axios.post(
-        "http://localhost:5000/api/repos/create",
-        { name: newRepoName, userId },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      setNewRepoName("");
-      fetchRepos();
-    } catch (error) {
-      console.error("❌ Error creating repository:", error?.response?.data || error.message);
-    }
+    await createRepo(userId, newRepoName);
+    setNewRepoName("");
+    loadRepos();
   };
 
-  const deleteRepo = async (repoId) => {
+  const handleDeleteRepo = async (repoId) => {
     if (!repoId) return;
 
-    try {
-      const auth = getAuth();
-      const token = await auth.currentUser?.getIdToken();
-
-      if (!token) {
-        console.error("❌ No authentication token found.");
-        return;
-      }
-
-      await axios.delete(`http://localhost:5000/api/repos/${repoId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      fetchRepos();
-    } catch (error) {
-      console.error("❌ Error deleting repository:", error?.response?.data || error.message);
-    }
+    await deleteRepo(repoId);
+    loadRepos();
   };
 
   return (
@@ -121,7 +68,7 @@ export default function Sidebar() {
                 <Folder /> {!collapsed && repo.name}
               </span>
               {!collapsed && (
-                <Button variant="ghost" size="icon" onClick={() => deleteRepo(repo._id)}>
+                <Button variant="ghost" size="icon" onClick={() => handleDeleteRepo(repo._id)}>
                   <Trash className="text-red-400" />
                 </Button>
               )}
@@ -139,7 +86,7 @@ export default function Sidebar() {
             value={newRepoName}
             onChange={(e) => setNewRepoName(e.target.value)}
           />
-          <Button onClick={createRepo}>
+          <Button onClick={handleCreateRepo}>
             <Plus />
           </Button>
         </div>
