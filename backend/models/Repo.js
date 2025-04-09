@@ -1,17 +1,17 @@
 const mongoose = require("mongoose");
 
 const nodeSchema = new mongoose.Schema({
-  name: String,
+  name: { type: String, required: true },
   type: { type: String, enum: ["file", "folder"], required: true },
-  content: String, // Only for files
-  children: [this], // Only for folders (recursive schema)
+  content: { type: String }, // Only for files
+  children: { type: [mongoose.Schema.Types.Mixed], default: [] }, // For folders
 }, { _id: false });
 
 const repoSchema = new mongoose.Schema(
   {
     name: { type: String, required: true },
     userId: { type: String, required: true },
-    structure: [nodeSchema], // Nested structure for files and folders
+    structure: [nodeSchema], // Top-level nodes
   },
   { timestamps: true }
 );

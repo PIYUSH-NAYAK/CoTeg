@@ -1,3 +1,4 @@
+// src/AuthContext.jsx
 import { createContext, useContext, useEffect, useState } from "react";
 import { initializeApp, getApps, getApp } from "firebase/app";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
@@ -6,7 +7,7 @@ import {
   signInWithEmail,
   signUpWithEmail,
   logout,
-} from "./firebaseprop"; // Your custom auth functions
+} from "./firebaseprop"; // your custom logic
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -17,14 +18,11 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID,
 };
 
-// Initialize Firebase app
 const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
-// Create context
 const AuthContext = createContext();
 
-// AuthProvider component
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
 
@@ -62,5 +60,4 @@ export const AuthProvider = ({ children }) => {
   );
 };
 
-// useAuth hook
 export const useAuth = () => useContext(AuthContext);

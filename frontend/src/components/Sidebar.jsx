@@ -1,34 +1,17 @@
+// src/components/Sidebar.jsx
 import { useState, useEffect } from "react";
-import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Folder, Plus, Trash, ChevronLeft, ChevronRight } from "lucide-react";
+import { fetchRepos, createRepo, deleteRepo } from "../api/repoApi";
 
-import { fetchRepos, createRepo, deleteRepo } from "../api/repoApi"; // ✅ Make sure path is correct
-
-export default function Sidebar() {
+export default function Sidebar({ userId }) {
   const [collapsed, setCollapsed] = useState(false);
   const [repos, setRepos] = useState([]);
   const [newRepoName, setNewRepoName] = useState("");
-  const [userId, setUserId] = useState(null);
 
   useEffect(() => {
-    const auth = getAuth();
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        setUserId(user.uid);
-      } else {
-        setUserId(null);
-      }
-    });
-
-    return () => unsubscribe();
-  }, []);
-
-  useEffect(() => {
-    if (userId) {
-      loadRepos();
-    }
+    if (userId) loadRepos();
   }, [userId]);
 
   const loadRepos = async () => {
@@ -38,7 +21,6 @@ export default function Sidebar() {
 
   const handleCreateRepo = async () => {
     if (!newRepoName.trim() || !userId) return;
-
     await createRepo(userId, newRepoName);
     setNewRepoName("");
     loadRepos();
@@ -46,7 +28,6 @@ export default function Sidebar() {
 
   const handleDeleteRepo = async (repoId) => {
     if (!repoId) return;
-
     await deleteRepo(repoId);
     loadRepos();
   };
@@ -79,7 +60,7 @@ export default function Sidebar() {
         )}
       </div>
 
-      {!collapsed && (
+      {userId && !collapsed && (
         <div className="mt-4 flex gap-2">
           <Input
             placeholder="New Repo"

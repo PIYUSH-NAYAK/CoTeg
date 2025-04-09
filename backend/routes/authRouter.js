@@ -6,5 +6,7 @@ const roomController = require('../controllers/roomController');
 router.post('/create', roomController.createRoom);
 router.get('/:roomId', roomController.getRoom);
 router.put('/updateCode/:roomId', roomController.updateCode);
+router.post('/join', roomController.joinRoom);
+
 
 module.exports = router;
